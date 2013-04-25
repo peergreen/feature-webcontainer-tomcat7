@@ -1,0 +1,45 @@
+Export-Package: com.peergreen.webcontainer.tomcat7
+
+Private-Package: com.peergreen.webcontainer.tomcat7.internal.*, \
+                org.apache.catalina.*;-split-package:=merge-first, \
+                org.apache.jasper.*;-split-package:=merge-first, \
+                org.apache.naming.*
+
+
+
+Import-Package  !org.apache.tools.ant.*, \
+                javax.ejb.*;resolution:=optional,\
+                javax.persistence.*;resolution:=optional,\
+                javax.mail.*;resolution:=optional,\
+                *
+
+DynamicImport-Package javax.servlet.resources, \
+                      javax.servlet.jsp.resources
+
+
+
+# Need to export the Jasper classes used by the generated JSP classes (not in bundle)
+-exportcontents org.apache.jasper.runtime;version=${tomcat7.version}, \
+                org.apache.jasper.compiler;version=${tomcat7.version}, \
+                org.apache.jasper.compiler.*;version=${tomcat7.version}, \
+                org.apache.jasper.el.*;version=${tomcat7.version}, \
+                org.apache.jasper.servlet;version=${tomcat7.version}, \
+                org.apache.jasper;version=${tomcat7.version}, \
+                org.apache.catalina.*;version=${tomcat7.version}, \
+                org.apache.tomcat;version=${tomcat7.version}, \
+                org.apache.el.*;version=${tomcat7.version}, \
+                org.apache.juli.*;version=${tomcat7.version}
+                
+# Avoid adding transitive dependencies as first level
+# dependency in the POM to allow bundle inclusion
+Embed-Transitive true
+
+Embed-Dependency asm;inline=true, \
+                 tomcat-catalina;inline=true,\
+                 tomcat-coyote;inline=true, \
+                 tomcat-util;inline=true, \
+                 tomcat-tribes;inline=true, \
+                 tomcat-juli;inline=true, \
+                 tomcat-api;inline=true, \
+                 tomcat-jasper-el;inline=true, \
+                 ecj;inline=true
