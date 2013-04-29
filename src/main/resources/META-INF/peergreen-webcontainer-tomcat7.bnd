@@ -14,8 +14,8 @@ Import-Package  !org.apache.tools.ant.*, \
                 *
 
 DynamicImport-Package javax.servlet.resources, \
-                      javax.servlet.jsp.resources
-
+                      javax.servlet.jsp.resources, \
+                      *
 
 
 # Need to export the Jasper classes used by the generated JSP classes (not in bundle)
