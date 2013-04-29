@@ -20,6 +20,7 @@ import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Instantiate;
 import org.apache.felix.ipojo.annotations.Provides;
 import org.apache.felix.ipojo.annotations.Validate;
+import org.osgi.framework.BundleContext;
 
 import com.peergreen.deployment.DelegateHandlerProcessor;
 import com.peergreen.deployment.ProcessorException;
@@ -32,8 +33,8 @@ import com.peergreen.webcontainer.WebApplicationLifeCycle;
 @Instantiate
 public class WebApplicationDeployerDelegateInternalProcessor extends DelegateHandlerProcessor<WebApplication> {
 
-    public WebApplicationDeployerDelegateInternalProcessor() throws ProcessorException {
-        super(new WebApplicationDeployerProcessor(), WebApplication.class);
+    public WebApplicationDeployerDelegateInternalProcessor(BundleContext bundleContext) throws ProcessorException {
+        super(new WebApplicationDeployerProcessor(bundleContext), WebApplication.class);
     }
 
     @Override
