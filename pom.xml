@@ -72,22 +72,18 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
-    <groupId>org.osgi</groupId>
-    <artifactId>org.osgi.core</artifactId>
-    <version>5.0.0</version>
-    <scope>provided</scope>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.core</artifactId>
+      <version>5.0.0</version>
+      <scope>provided</scope>
     </dependency>
 
-
-<dependency>
-<groupId>org.ow2.spec.ee</groupId>
-<artifactId>ow2-servlet-3.0-spec</artifactId>
-<version>1.0.12</version>
-<scope>provided</scope>
-
-</dependency>
-
-
+    <dependency>
+      <groupId>org.ow2.spec.ee</groupId>
+      <artifactId>ow2-servlet-3.0-spec</artifactId>
+      <version>1.0.12</version>
+      <scope>provided</scope>
+    </dependency>
 
     <dependency>
       <groupId>org.apache.tomcat</groupId>
@@ -185,7 +181,7 @@
       <version>${tomcat7.version}</version>
     </dependency>
 
-       
+
   </dependencies>
 
 
