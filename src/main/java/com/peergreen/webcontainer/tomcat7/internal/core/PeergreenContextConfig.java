@@ -16,10 +16,19 @@
 package com.peergreen.webcontainer.tomcat7.internal.core;
 
 import org.apache.catalina.startup.ContextConfig;
+import org.xml.sax.InputSource;
 
 /**
  * @author Florent Benoit
  */
 public class PeergreenContextConfig extends ContextConfig {
 
+
+    /**
+     * Gets the global Web XML source from the resources.
+     */
+    @Override
+    protected InputSource getGlobalWebXmlSource() {
+        return new InputSource(PeergreenContextConfig.class.getResource("/tomcat7-web.xml").toExternalForm());
+    }
 }
