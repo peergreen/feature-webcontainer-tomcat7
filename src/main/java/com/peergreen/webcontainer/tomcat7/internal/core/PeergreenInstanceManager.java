@@ -15,6 +15,7 @@
  */
 package com.peergreen.webcontainer.tomcat7.internal.core;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.AccessController;
@@ -22,18 +23,23 @@ import java.security.PrivilegedAction;
 import java.util.Map;
 import java.util.WeakHashMap;
 
+import javax.annotation.Resource;
 import javax.naming.NamingException;
 
 import org.apache.catalina.Context;
 import org.apache.catalina.Globals;
+import org.apache.catalina.util.Introspection;
 import org.apache.tomcat.InstanceManager;
+import org.osgi.framework.BundleContext;
 
 public class PeergreenInstanceManager implements InstanceManager {
 
+    private final BundleContext bundleContext;
 
     private final ClassLoader classLoader;
 
-    public PeergreenInstanceManager(Context context) {
+    public PeergreenInstanceManager(BundleContext bundleContext, Context context) {
+        this.bundleContext = bundleContext;
         this.classLoader = context.getLoader().getClassLoader();
     }
 
@@ -64,16 +70,40 @@ public class PeergreenInstanceManager implements InstanceManager {
     }
 
     private Object newInstance(Object instance, Class<?> clazz) throws IllegalAccessException, InvocationTargetException, NamingException {
+
+        // Search resource
+        Field[] fields = Introspection.getDeclaredFields(clazz);
+        Method[] methods = Introspection.getDeclaredMethods(clazz);
+
+
+        for (Field f : fields) {
+            Resource resource = f.getAnnotation(Resource.class);
+            // needs to inject the bundle context
+            if (resource != null && BundleContext.class.equals(f.getType())) {
+                f.setAccessible(true);
+                f.set(instance, bundleContext);
+            }
+        }
+
+
+        for (Method method : methods) {
+            Resource resource = method.getAnnotation(Resource.class);
+            // needs to inject the bundle context
+            if (resource != null && method.getParameterTypes().length == 1 && BundleContext.class.equals(method.getParameterTypes()[0])) {
+                method.setAccessible(true);
+                method.invoke(instance, bundleContext);
+            }
+
+        }
+
+
         return instance;
     }
 
 
 
-
-
     /**
      * Call preDestroy method on the specified instance recursively from deepest superclass to actual class.
-     *
      * @param instance object to call preDestroy methods on
      * @param clazz    (super) class to examine for preDestroy annotation.
      * @throws IllegalAccessException if preDestroy method is inaccessible.
@@ -141,6 +171,10 @@ public class PeergreenInstanceManager implements InstanceManager {
         }
         return result;
     }
+
+
+
+
 
     private static final class AnnotationCacheEntry {
         private final String accessibleObjectName;
