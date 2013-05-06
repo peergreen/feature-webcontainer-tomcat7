@@ -19,16 +19,18 @@ import org.apache.catalina.startup.ContextConfig;
 import org.xml.sax.InputSource;
 
 /**
+ * Allows to define a configuration for a Tomcat context.
  * @author Florent Benoit
  */
 public class PeergreenContextConfig extends ContextConfig {
 
 
     /**
-     * Gets the global Web XML source from the resources.
+     * Gets the global Web XML source from the Bundle resources.
      */
     @Override
     protected InputSource getGlobalWebXmlSource() {
+        //FIXME : should use the config repository to find the resource
         return new InputSource(PeergreenContextConfig.class.getResource("/tomcat7-web.xml").toExternalForm());
     }
 }

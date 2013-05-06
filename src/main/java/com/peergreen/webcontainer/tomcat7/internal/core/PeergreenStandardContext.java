@@ -18,10 +18,11 @@ package com.peergreen.webcontainer.tomcat7.internal.core;
 import org.apache.catalina.core.StandardContext;
 
 /**
- * Defines th
+ * Defines the customized version of StandardContext
  *
  * @author Florent Benoit
  */
 public class PeergreenStandardContext extends StandardContext {
+
 
 }

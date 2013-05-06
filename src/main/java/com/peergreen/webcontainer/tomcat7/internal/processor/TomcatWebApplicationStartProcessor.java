@@ -20,7 +20,7 @@ import org.apache.catalina.Host;
 import com.peergreen.deployment.Processor;
 import com.peergreen.deployment.ProcessorContext;
 import com.peergreen.deployment.ProcessorException;
-import com.peergreen.webcontainer.tomcat7.Tomcat7Service;
+import com.peergreen.webcontainer.tomcat7.internal.InternalTomcat7Service;
 import com.peergreen.webcontainer.tomcat7.internal.TomcatWebApplication;
 
 /**
@@ -29,29 +29,20 @@ import com.peergreen.webcontainer.tomcat7.internal.TomcatWebApplication;
  */
 public class TomcatWebApplicationStartProcessor implements Processor<TomcatWebApplication> {
 
-    private final Tomcat7Service tomcat7Service;
+    private final InternalTomcat7Service tomcat7Service;
 
-
-    public TomcatWebApplicationStartProcessor(Tomcat7Service tomcat7Service) {
+    public TomcatWebApplicationStartProcessor(InternalTomcat7Service tomcat7Service) {
         this.tomcat7Service = tomcat7Service;
     }
 
     @Override
     public void handle(TomcatWebApplication tomcatWebApplication, ProcessorContext processorContext) throws ProcessorException {
 
-        // start the given tomcat web application
-        System.out.println("Starting the TomcatWebApplication application " + tomcatWebApplication);
-
         // Gets the host
         Host host = tomcat7Service.getDefaultHost();
 
         // Starts the context
         host.addChild(tomcatWebApplication.getContext());
-
-
-
-
     }
-
 
 }

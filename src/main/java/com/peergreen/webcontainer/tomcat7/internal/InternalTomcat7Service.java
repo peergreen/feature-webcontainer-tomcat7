@@ -13,13 +13,20 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.peergreen.webcontainer.tomcat7;
+package com.peergreen.webcontainer.tomcat7.internal;
+
+import org.apache.catalina.Host;
 
 /**
- * Defines the interface for Tomcat 7
+ * Interface only available from the Tomcat7 internals.
  * @author Florent Benoit
  */
-public interface Tomcat7Service {
+public interface InternalTomcat7Service {
+
+    /**
+     * @return the default host of the Tomcat instance
+     */
+    Host getDefaultHost();
 
 
 }

@@ -32,6 +32,12 @@ import org.apache.catalina.util.Introspection;
 import org.apache.tomcat.InstanceManager;
 import org.osgi.framework.BundleContext;
 
+/**
+ * This instance allows to inject resources.
+ * It allows to inject BundleContext
+ * FIXME: Injection should rely on external services. If EJB are available, @EJB can be used, etc.
+ * @author Florent Benoit
+ */
 public class PeergreenInstanceManager implements InstanceManager {
 
     private final BundleContext bundleContext;

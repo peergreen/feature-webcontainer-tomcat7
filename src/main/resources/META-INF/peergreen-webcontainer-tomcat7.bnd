@@ -30,6 +30,7 @@ DynamicImport-Package javax.servlet.resources, \
                 org.apache.el.*;version=${tomcat7.version}, \
                 org.apache.juli.*;version=${tomcat7.version}
                 
+                
 # Avoid adding transitive dependencies as first level
 # dependency in the POM to allow bundle inclusion
 Embed-Transitive true

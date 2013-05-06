@@ -26,7 +26,7 @@ import com.peergreen.deployment.DelegateHandlerProcessor;
 import com.peergreen.deployment.ProcessorException;
 import com.peergreen.deployment.resource.builder.RequirementBuilder;
 import com.peergreen.webcontainer.WebApplicationLifeCycle;
-import com.peergreen.webcontainer.tomcat7.Tomcat7Service;
+import com.peergreen.webcontainer.tomcat7.internal.InternalTomcat7Service;
 import com.peergreen.webcontainer.tomcat7.internal.TomcatWebApplication;
 
 @Component
@@ -34,7 +34,7 @@ import com.peergreen.webcontainer.tomcat7.internal.TomcatWebApplication;
 @Instantiate
 public class TomcatWebApplicationStartDelegateInternalProcessor extends DelegateHandlerProcessor<TomcatWebApplication> {
 
-    public TomcatWebApplicationStartDelegateInternalProcessor(@Requires Tomcat7Service tomcat7Service) throws ProcessorException {
+    public TomcatWebApplicationStartDelegateInternalProcessor(@Requires InternalTomcat7Service tomcat7Service) throws ProcessorException {
         super(new TomcatWebApplicationStartProcessor(tomcat7Service), TomcatWebApplication.class);
     }
 

@@ -15,11 +15,6 @@
  */
 package com.peergreen.webcontainer.tomcat7.internal.processor;
 
-import org.apache.catalina.Lifecycle;
-import org.apache.catalina.LifecycleEvent;
-import org.apache.catalina.LifecycleListener;
-import org.apache.catalina.core.StandardContext;
-import org.apache.tomcat.InstanceManager;
 import org.osgi.framework.BundleContext;
 
 import com.peergreen.deployment.Processor;
@@ -28,8 +23,8 @@ import com.peergreen.deployment.ProcessorException;
 import com.peergreen.webcontainer.WebApplication;
 import com.peergreen.webcontainer.tomcat7.internal.TomcatWebApplication;
 import com.peergreen.webcontainer.tomcat7.internal.classloader.DynamicImportAllClassLoader;
+import com.peergreen.webcontainer.tomcat7.internal.core.InstanceManagerLifeCycleListener;
 import com.peergreen.webcontainer.tomcat7.internal.core.PeergreenContextConfig;
-import com.peergreen.webcontainer.tomcat7.internal.core.PeergreenInstanceManager;
 import com.peergreen.webcontainer.tomcat7.internal.core.PeergreenStandardContext;
 
 /**
@@ -49,7 +44,7 @@ public class WebApplicationDeployerProcessor implements Processor<WebApplication
     public void handle(WebApplication webApplication, ProcessorContext processorContext) throws ProcessorException {
 
         // deploy the given web application
-        System.out.println("Deploying the web application with context" + webApplication.getContextPath());
+        System.out.println("Deploying the web application with context " + webApplication.getContextPath());
 
         // Creates the context
         final PeergreenStandardContext context = new PeergreenStandardContext();
@@ -68,20 +63,7 @@ public class WebApplicationDeployerProcessor implements Processor<WebApplication
         context.addLifecycleListener(contextConfig);
 
         // Set the PG Instance Manager
-        context.addLifecycleListener(new LifecycleListener() {
-            @Override
-            public void lifecycleEvent(LifecycleEvent event) {
-                if (Lifecycle.CONFIGURE_START_EVENT.equals(event.getType())) {
-                    final StandardContext standardContext = ((StandardContext) event.getLifecycle());
-                    //Map<String, Map<String, String>> injectionMap = new HashMap<String, Map<String, String>>();
-                    final InstanceManager instanceManager = new PeergreenInstanceManager(bundleContext, context);
-                    standardContext.setInstanceManager(instanceManager);
-                    standardContext.getServletContext()
-                            .setAttribute(InstanceManager.class.getName(), standardContext.getInstanceManager());
-                }
-            }
-        });
-
+        context.addLifecycleListener(new InstanceManagerLifeCycleListener(bundleContext));
 
         // Sets the parent class loader with the OSGi dynamic import classloader
         context.setParentClassLoader(new DynamicImportAllClassLoader());

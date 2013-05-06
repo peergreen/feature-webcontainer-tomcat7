@@ -30,6 +30,7 @@ import org.osgi.service.url.URLStreamHandlerSetter;
 
 /**
  * The Tomcat URL handler needs to be registered though OSGi service.
+ * Also, this registration is removed from the Tomcat way which result in an exception as only one URLHandler can be registered in the JVM
  * @author Florent Benoit
  */
 @Component

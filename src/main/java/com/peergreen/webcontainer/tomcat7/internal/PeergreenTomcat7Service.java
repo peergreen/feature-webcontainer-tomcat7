@@ -15,7 +15,6 @@
  */
 package com.peergreen.webcontainer.tomcat7.internal;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.URL;
@@ -28,6 +27,7 @@ import org.apache.catalina.Container;
 import org.apache.catalina.Engine;
 import org.apache.catalina.Globals;
 import org.apache.catalina.Host;
+import org.apache.catalina.LifecycleException;
 import org.apache.catalina.Server;
 import org.apache.catalina.Service;
 import org.apache.catalina.loader.WebappLoader;
@@ -38,6 +38,7 @@ import org.apache.felix.ipojo.annotations.Requires;
 import org.apache.felix.ipojo.annotations.Validate;
 import org.apache.tomcat.util.digester.Digester;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import com.peergreen.deployment.DeploymentService;
 import com.peergreen.webcontainer.tomcat7.Tomcat7Service;
@@ -50,14 +51,23 @@ import com.peergreen.webcontainer.tomcat7.internal.ruleset.TomcatRuleSet;
 @Component
 @Provides
 @Instantiate
-public class PeergreenTomcat7Service implements Tomcat7Service {
+public class PeergreenTomcat7Service implements Tomcat7Service, InternalTomcat7Service {
 
+    /**
+     * Deployment service.
+     */
     @Requires
     private DeploymentService deploymentService;
 
-
+    /**
+     * Tomcat server instance.
+     */
     private Server server;
 
+    /**
+     * Creates a digester instance.
+     * @return the customized digester
+     */
     protected Digester initializeDigester() {
 
         // Initialize the digester
@@ -71,7 +81,6 @@ public class PeergreenTomcat7Service implements Tomcat7Service {
     }
 
 
-
     /**
      * Set the server instance we are configuring.
      * @param server The new server
@@ -81,144 +90,54 @@ public class PeergreenTomcat7Service implements Tomcat7Service {
     }
 
 
-
     /**
      * Launch the Tomcat instance
      */
     @Validate
     public void start()  {
-        System.out.println("starting Tomcat7....");
 
-        // set catalina.base
+        // set catalina.base property
         Path tmpFile;
         try {
             tmpFile = Files.createTempDirectory("tomcat");
-        } catch (IOException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-            return;
+        } catch (IOException e) {
+            throw new IllegalStateException("Unable to get a working directory", e);
         }
-        System.out.println("catalina.base set to " + tmpFile);
         System.setProperty(Globals.CATALINA_BASE_PROP, tmpFile.toFile().getPath());
 
-
-        try {
 
         // Create the digester for the parsing of the server.xml.
         Digester digester = initializeDigester();
 
         // Execute the digester for the parsing of the server.xml.
-        // And configure the catalina server.
-        File configFile = null;
-
         URL tomcat7ConfigurationURL = PeergreenTomcat7Service.class.getResource("/tomcat7-server.xml");
-
-
         InputSource is = new InputSource(tomcat7ConfigurationURL.toExternalForm());
-        //FileInputStream fis = new FileInputStream(configFile);
-        //is.setByteStream(fis);
         digester.setClassLoader(this.getClass().getClassLoader());
         digester.push(this);
-        digester.parse(is);
-
-
-        // Disable registration of the Tomcat URL handler as it is done through OSGi
-        Field f = WebappLoader.class.getDeclaredField("first");
-        f.setAccessible(true);
-        f.set(null,  false);
-        f.setAccessible(false);
-
-
-
-        server.init();
-        server.start();
-        } catch (RuntimeException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } catch (Error e) {
-            e.printStackTrace();
+        try {
+            digester.parse(is);
+        } catch (IOException | SAXException e) {
+            throw new IllegalStateException("Unable to start tomcat", e);
         }
 
+        // Disable registration of the Tomcat URL handler as it is done through OSGi
+        Field f;
+        try {
+            f = WebappLoader.class.getDeclaredField("first");
+            f.setAccessible(true);
+            f.set(null,  false);
+            f.setAccessible(false);
+        } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
+            throw new IllegalStateException("Unable to reset Tomcat URL Handler", e);
+        }
 
-//
-
-
-//        // Set the Domain and the name for each known Engine
-//        for (StandardEngine engine : getEngines()) {
-//            // WARNING : the order of th two next lines is very important.
-//            // The domain must be set in first and the name after.
-//            // In the others cases, Tomcat 6 doesn't set correctly these two
-//            // properties
-//            // because there are somes controls that forbid to have a difference
-//            // between
-//            // the name and the domain. Certainly a bug !
-//            engine.setDomain(getDomainName());
-//            engine.setName(getDomainName());
-//        }
-//
-//        // If OnDemand Feature is enabled, the http connector port needs to be changed
-//        // And keep-alive feature should be turned-off (to monitor all requests)
-//        if (isOnDemandFeatureEnabled()) {
-//            Service[] services = getServer().findServices();
-//
-//            // set name of the first service
-//            if (services.length > 0) {
-//                services[0].setName(getDomainName());
-//            }
-//
-//            // Get connector of each service
-//            for (int s = 0; s < services.length; s++) {
-//                Connector[] connectors = services[s].findConnectors();
-//                if (connectors.length >= 1) {
-//                    // Only for the first connector
-//                    Connector connector = connectors[0];
-//                    connector.setProperty("maxKeepAliveRequests", "1");
-//                    connector.setPort(getOnDemandRedirectPort());
-//                    connector.setProxyPort(Integer.parseInt(getDefaultHttpPort()));
-//                }
-//            }
-//        }
-
-
-
-
-//        /
-//
-//
-//        // Start Tomcat server in an execution block
-//        IExecution<Void> startExec = new IExecution<Void>() {
-//            public Void execute() throws ServiceException {
-//                // Finaly start catalina ...
-//                if (server instanceof LifecycleMBeanBase) {
-//                    try {
-//                        ((LifecycleMBeanBase) server).setDomain(getDomainName());
-//                        server.init();
-//                        ((LifecycleMBeanBase) server).setDomain(getDomainName());
-//                        Service[] services = getServer().findServices();
-//                        // set name of the first service
-//                        if (services.length > 0) {
-//                            services[0].setName(getDomainName());
-//                        }
-//                        ((Lifecycle) server).start();
-//                    } catch (Exception e) {
-//                        logger.error("Cannot start the Tomcat server", e);
-//                        throw new ServiceException("Cannot start the Tomcat server", e);
-//                    }
-//                }
-//
-//                return null;
-//            }
-//        };
-//
-//        // Execute
-//        ExecutionResult<Void> startExecResult = RunnableHelper.execute(getClass().getClassLoader(), startExec);
-//
-//        // Throw an ServiceException if needed
-//        if (startExecResult.hasException()) {
-//            logger.error("Cannot start the Tomcat server", startExecResult.getException());
-//            throw new ServiceException("Cannot start the Tomcat Server", startExecResult.getException());
-//        }
+        // Init and start thre tomcat instance
+        try {
+            server.init();
+            server.start();
+        } catch (LifecycleException e) {
+            throw new IllegalStateException("Unable to start Tomcat", e);
+        }
 
     }
 
@@ -231,6 +150,7 @@ public class PeergreenTomcat7Service implements Tomcat7Service {
     public Host getDefaultHost() {
         return getHost(null);
     }
+
 
 
     /**
