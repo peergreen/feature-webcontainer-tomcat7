@@ -37,11 +37,13 @@ import org.apache.felix.ipojo.annotations.Provides;
 import org.apache.felix.ipojo.annotations.Requires;
 import org.apache.felix.ipojo.annotations.Validate;
 import org.apache.tomcat.util.digester.Digester;
+import org.osgi.framework.BundleContext;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.peergreen.deployment.DeploymentService;
 import com.peergreen.webcontainer.tomcat7.Tomcat7Service;
+import com.peergreen.webcontainer.tomcat7.internal.ruleset.BundleContextDigester;
 import com.peergreen.webcontainer.tomcat7.internal.ruleset.TomcatRuleSet;
 
 /**
@@ -65,13 +67,22 @@ public class PeergreenTomcat7Service implements Tomcat7Service, InternalTomcat7S
     private Server server;
 
     /**
+     * BundleContext to be shared/distributed into Tomcat's components.
+     */
+    private final BundleContext bundleContext;
+
+    public PeergreenTomcat7Service(BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
+    }
+
+    /**
      * Creates a digester instance.
      * @return the customized digester
      */
     protected Digester initializeDigester() {
 
         // Initialize the digester
-        Digester digester = new Digester();
+        Digester digester = new BundleContextDigester(bundleContext);
         digester.setValidating(false);
         digester.addRuleSet(new TomcatRuleSet(PeergreenTomcat7Service.class.getClassLoader()));
 
@@ -80,7 +91,6 @@ public class PeergreenTomcat7Service implements Tomcat7Service, InternalTomcat7S
         return digester;
     }
 
-
     /**
      * Set the server instance we are configuring.
      * @param server The new server
@@ -88,7 +98,6 @@ public class PeergreenTomcat7Service implements Tomcat7Service, InternalTomcat7S
     public void setServer(final Server server) {
         this.server = server;
     }
-
 
     /**
      * Launch the Tomcat instance
@@ -150,7 +159,6 @@ public class PeergreenTomcat7Service implements Tomcat7Service, InternalTomcat7S
     public Host getDefaultHost() {
         return getHost(null);
     }
-
 
 
     /**
