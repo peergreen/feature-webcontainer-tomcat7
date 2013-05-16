@@ -225,8 +225,11 @@ public class BasicTomcat7HttpService implements InternalTomcat7HttpService {
 
         // adds the wrapper
         wrapperLock.lock();
-        wrappers.add(wrapper);
-        wrapperLock.lock();
+        try {
+            wrappers.add(wrapper);
+        } finally {
+            wrapperLock.unlock();
+        }
 
         // Sets the classloader
         wrapper.setParentClassLoader(servlet.getClass().getClassLoader());
