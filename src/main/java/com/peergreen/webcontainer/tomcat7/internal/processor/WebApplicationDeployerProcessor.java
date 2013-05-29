@@ -15,11 +15,17 @@
  */
 package com.peergreen.webcontainer.tomcat7.internal.processor;
 
+import org.apache.felix.ipojo.annotations.Component;
+import org.apache.felix.ipojo.annotations.Instantiate;
 import org.osgi.framework.BundleContext;
 
-import com.peergreen.deployment.Processor;
+import com.peergreen.deployment.DiscoveryPhasesLifecycle;
 import com.peergreen.deployment.ProcessorContext;
 import com.peergreen.deployment.ProcessorException;
+import com.peergreen.deployment.processor.Discovery;
+import com.peergreen.deployment.processor.Phase;
+import com.peergreen.deployment.processor.Uri;
+import com.peergreen.deployment.processor.handler.Processor;
 import com.peergreen.webcontainer.WebApplication;
 import com.peergreen.webcontainer.tomcat7.internal.TomcatWebApplication;
 import com.peergreen.webcontainer.tomcat7.internal.classloader.DynamicImportAllClassLoader;
@@ -31,16 +37,18 @@ import com.peergreen.webcontainer.tomcat7.internal.core.PeergreenStandardContext
  * WAR scanner.
  * @author Florent Benoit
  */
-public class WebApplicationDeployerProcessor implements Processor<WebApplication> {
+@Component
+@Instantiate
+@Processor
+@Phase("DEPLOY")
+public class WebApplicationDeployerProcessor {
 
     private final BundleContext bundleContext;
 
     public WebApplicationDeployerProcessor(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
-  }
+    }
 
-
-    @Override
     public void handle(WebApplication webApplication, ProcessorContext processorContext) throws ProcessorException {
 
         // deploy the given web application
@@ -59,7 +67,7 @@ public class WebApplicationDeployerProcessor implements Processor<WebApplication
         context.setUnpackWAR(true);
 
         // add the context config
-       PeergreenContextConfig contextConfig = new PeergreenContextConfig();
+        PeergreenContextConfig contextConfig = new PeergreenContextConfig();
         context.addLifecycleListener(contextConfig);
 
         // Set the PG Instance Manager

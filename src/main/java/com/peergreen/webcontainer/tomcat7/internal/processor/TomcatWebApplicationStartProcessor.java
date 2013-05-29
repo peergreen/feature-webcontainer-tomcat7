@@ -16,10 +16,14 @@
 package com.peergreen.webcontainer.tomcat7.internal.processor;
 
 import org.apache.catalina.Host;
+import org.apache.felix.ipojo.annotations.Component;
+import org.apache.felix.ipojo.annotations.Instantiate;
+import org.apache.felix.ipojo.annotations.Requires;
 
-import com.peergreen.deployment.Processor;
 import com.peergreen.deployment.ProcessorContext;
 import com.peergreen.deployment.ProcessorException;
+import com.peergreen.deployment.processor.Phase;
+import com.peergreen.deployment.processor.handler.Processor;
 import com.peergreen.webcontainer.tomcat7.internal.InternalTomcat7Service;
 import com.peergreen.webcontainer.tomcat7.internal.TomcatWebApplication;
 
@@ -27,15 +31,18 @@ import com.peergreen.webcontainer.tomcat7.internal.TomcatWebApplication;
  * WAR scanner.
  * @author Florent Benoit
  */
-public class TomcatWebApplicationStartProcessor implements Processor<TomcatWebApplication> {
+@Component
+@Instantiate
+@Processor
+@Phase("START")
+public class TomcatWebApplicationStartProcessor {
 
     private final InternalTomcat7Service tomcat7Service;
 
-    public TomcatWebApplicationStartProcessor(InternalTomcat7Service tomcat7Service) {
+    public TomcatWebApplicationStartProcessor(@Requires InternalTomcat7Service tomcat7Service) {
         this.tomcat7Service = tomcat7Service;
     }
 
-    @Override
     public void handle(TomcatWebApplication tomcatWebApplication, ProcessorContext processorContext) throws ProcessorException {
 
         // Gets the host
