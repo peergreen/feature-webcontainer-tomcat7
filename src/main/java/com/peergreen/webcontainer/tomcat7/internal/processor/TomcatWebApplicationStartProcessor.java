@@ -16,8 +16,6 @@
 package com.peergreen.webcontainer.tomcat7.internal.processor;
 
 import org.apache.catalina.Host;
-import org.apache.felix.ipojo.annotations.Component;
-import org.apache.felix.ipojo.annotations.Instantiate;
 import org.apache.felix.ipojo.annotations.Requires;
 
 import com.peergreen.deployment.ProcessorContext;
