@@ -19,13 +19,10 @@ import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Instantiate;
 import org.osgi.framework.BundleContext;
 
-import com.peergreen.deployment.DiscoveryPhasesLifecycle;
 import com.peergreen.deployment.ProcessorContext;
 import com.peergreen.deployment.ProcessorException;
-import com.peergreen.deployment.processor.Discovery;
 import com.peergreen.deployment.processor.Phase;
-import com.peergreen.deployment.processor.Uri;
-import com.peergreen.deployment.processor.handler.Processor;
+import com.peergreen.deployment.processor.Processor;
 import com.peergreen.webcontainer.WebApplication;
 import com.peergreen.webcontainer.tomcat7.internal.TomcatWebApplication;
 import com.peergreen.webcontainer.tomcat7.internal.classloader.DynamicImportAllClassLoader;
@@ -37,8 +34,6 @@ import com.peergreen.webcontainer.tomcat7.internal.core.PeergreenStandardContext
  * WAR scanner.
  * @author Florent Benoit
  */
-@Component
-@Instantiate
 @Processor
 @Phase("DEPLOY")
 public class WebApplicationDeployerProcessor {
