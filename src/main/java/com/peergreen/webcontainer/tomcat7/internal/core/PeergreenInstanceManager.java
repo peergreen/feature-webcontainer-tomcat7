@@ -37,14 +37,11 @@ import com.peergreen.webcontainer.WebApplication;
  */
 public class PeergreenInstanceManager implements InstanceManager {
 
-    private final WebApplication webApplication;
-
     private final ClassLoader classLoader;
 
     Map<String, AnnotatedClass> annotatedClasses;
 
     public PeergreenInstanceManager(WebApplication webApplication, Context context) {
-        this.webApplication = webApplication;
         if (webApplication != null) {
             this.annotatedClasses = webApplication.getAnnotatedClasses();
         }
