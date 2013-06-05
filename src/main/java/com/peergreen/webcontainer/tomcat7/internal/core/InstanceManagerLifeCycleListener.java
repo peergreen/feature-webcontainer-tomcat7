@@ -20,7 +20,8 @@ import org.apache.catalina.LifecycleEvent;
 import org.apache.catalina.LifecycleListener;
 import org.apache.catalina.core.StandardContext;
 import org.apache.tomcat.InstanceManager;
-import org.osgi.framework.BundleContext;
+
+import com.peergreen.webcontainer.WebApplication;
 
 /**
  * Allows to define a custom InstanceManager for a context
@@ -29,16 +30,16 @@ import org.osgi.framework.BundleContext;
 public class InstanceManagerLifeCycleListener implements LifecycleListener {
 
     /**
-     * BundleContext to use for the instance manager.
+     * Web application
      */
-    private final BundleContext bundleContext;
+    private final WebApplication webApplication;
 
     /**
      * Defines the constructor with the given bundle context.
      * @param bundleContext bundle context used to inject data
      */
-    public InstanceManagerLifeCycleListener(BundleContext bundleContext) {
-        this.bundleContext = bundleContext;
+    public InstanceManagerLifeCycleListener(WebApplication webApplication) {
+        this.webApplication = webApplication;
     }
 
 
@@ -50,10 +51,9 @@ public class InstanceManagerLifeCycleListener implements LifecycleListener {
 
         if (Lifecycle.CONFIGURE_START_EVENT.equals(event.getType())) {
             StandardContext standardContext = ((StandardContext) event.getLifecycle());
-            InstanceManager instanceManager = new PeergreenInstanceManager(bundleContext, standardContext);
+            InstanceManager instanceManager = new PeergreenInstanceManager(webApplication, standardContext);
             standardContext.setInstanceManager(instanceManager);
-            standardContext.getServletContext()
-                    .setAttribute(InstanceManager.class.getName(), standardContext.getInstanceManager());
+            standardContext.getServletContext().setAttribute(InstanceManager.class.getName(), standardContext.getInstanceManager());
         }
 
     }

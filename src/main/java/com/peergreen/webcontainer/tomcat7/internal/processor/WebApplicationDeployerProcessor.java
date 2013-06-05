@@ -17,7 +17,6 @@ package com.peergreen.webcontainer.tomcat7.internal.processor;
 
 import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Instantiate;
-import org.osgi.framework.BundleContext;
 
 import com.peergreen.deployment.ProcessorContext;
 import com.peergreen.deployment.ProcessorException;
@@ -25,7 +24,6 @@ import com.peergreen.deployment.processor.Phase;
 import com.peergreen.deployment.processor.Processor;
 import com.peergreen.webcontainer.WebApplication;
 import com.peergreen.webcontainer.tomcat7.internal.TomcatWebApplication;
-import com.peergreen.webcontainer.tomcat7.internal.classloader.DynamicImportAllClassLoader;
 import com.peergreen.webcontainer.tomcat7.internal.core.InstanceManagerLifeCycleListener;
 import com.peergreen.webcontainer.tomcat7.internal.core.PeergreenContextConfig;
 import com.peergreen.webcontainer.tomcat7.internal.core.PeergreenStandardContext;
@@ -35,14 +33,9 @@ import com.peergreen.webcontainer.tomcat7.internal.core.PeergreenStandardContext
  * @author Florent Benoit
  */
 @Processor
-@Phase("DEPLOY")
+@Phase("INIT")
 public class WebApplicationDeployerProcessor {
 
-    private final BundleContext bundleContext;
-
-    public WebApplicationDeployerProcessor(BundleContext bundleContext) {
-        this.bundleContext = bundleContext;
-    }
 
     public void handle(WebApplication webApplication, ProcessorContext processorContext) throws ProcessorException {
 
@@ -52,24 +45,20 @@ public class WebApplicationDeployerProcessor {
         // Creates the context
         final PeergreenStandardContext context = new PeergreenStandardContext();
 
-        // sets the path to the war file
-        context.setDocBase(webApplication.getURI().getPath());
+        // Sets the docbase
+        context.setDocBase(webApplication.getUnpackedDirectory().getPath());
+        // Do not unpack the war (already done)
+        context.setUnpackWAR(false);
 
         // sets the context of the application
         context.setPath(webApplication.getContextPath());
-
-        // unpack the war if not yet unpacked
-        context.setUnpackWAR(true);
 
         // add the context config
         PeergreenContextConfig contextConfig = new PeergreenContextConfig();
         context.addLifecycleListener(contextConfig);
 
         // Set the PG Instance Manager
-        context.addLifecycleListener(new InstanceManagerLifeCycleListener(bundleContext));
-
-        // Sets the parent class loader with the OSGi dynamic import classloader
-        context.setParentClassLoader(new DynamicImportAllClassLoader());
+        context.addLifecycleListener(new InstanceManagerLifeCycleListener(webApplication));
 
         TomcatWebApplication tomcatWebApplication = new TomcatWebApplication();
         tomcatWebApplication.setContext(context);

@@ -151,7 +151,7 @@ public class BasicTomcat7HttpService implements InternalTomcat7HttpService {
             httpServiceStandardContext.addLifecycleListener(config);
 
             // Set the PG Instance Manager
-            httpServiceStandardContext.addLifecycleListener(new InstanceManagerLifeCycleListener(bundleContext));
+            httpServiceStandardContext.addLifecycleListener(new InstanceManagerLifeCycleListener(null));
 
             // Gets the default host
             final Host host = this.tomcat7Service.getDefaultHost();
