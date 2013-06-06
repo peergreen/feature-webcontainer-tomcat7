@@ -40,6 +40,7 @@ public class HttpContextSecurityValve extends ValveBase {
      * @param httpContext the http context
      */
     public HttpContextSecurityValve(HttpContext httpContext) {
+        super(true);
         this.httpContext = httpContext;
     }
 

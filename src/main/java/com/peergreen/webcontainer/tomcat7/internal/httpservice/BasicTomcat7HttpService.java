@@ -27,6 +27,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
 
 import org.apache.catalina.Container;
 import org.apache.catalina.Host;
@@ -122,6 +123,7 @@ public class BasicTomcat7HttpService implements InternalTomcat7HttpService {
      * Gets the context for the given alias info and the given http context
      * @param aliasInfo the context and servlet path
      * @param httpContext the HTTP context to use if the context is not existing
+     * @param servlet the servlet that is being registered
      * @return a new HttpServiceStandardContext if it was not found or an existing HttpServiceStandardContext
      * @throws ServletException
      */
@@ -221,6 +223,11 @@ public class BasicTomcat7HttpService implements InternalTomcat7HttpService {
         Wrapper wrapper = httpServiceStandardContext.createWrapper();
         wrapper.setName(aliasInfo.getServletPath());
         wrapper.setServlet(servlet);
+
+        WebServlet webServlet = Servlet.class.getAnnotation(WebServlet.class);
+        if (webServlet != null && webServlet.asyncSupported()) {
+                wrapper.setAsyncSupported(true);
+        }
         wrapper.getPipeline().addValve(new HttpContextSecurityValve(httpContext));
 
         // adds the wrapper
