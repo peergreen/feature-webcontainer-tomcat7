@@ -253,8 +253,10 @@ public class BasicTomcat7HttpService implements InternalTomcat7HttpService {
         // Adds the servlet in the given standard context
         httpServiceStandardContext.addChild(wrapper);
 
-        // initialize the servlet
-        wrapper.allocate();
+        // initialize the servlet (use allocate and then deallocate to put object back into the pool)
+        // the allocate method allowing us to initialize the servlet
+        Servlet instance = wrapper.allocate();
+        wrapper.deallocate(instance);
 
         // Adds the servlet mapping
         httpServiceStandardContext.addServletMapping(aliasInfo.getServletPath() + "/*", wrapper.getName(), true);
