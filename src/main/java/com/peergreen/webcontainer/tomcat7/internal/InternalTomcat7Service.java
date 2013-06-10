@@ -16,6 +16,7 @@
 package com.peergreen.webcontainer.tomcat7.internal;
 
 import org.apache.catalina.Host;
+import org.apache.catalina.startup.ContextConfig;
 
 /**
  * Interface only available from the Tomcat7 internals.
@@ -28,5 +29,9 @@ public interface InternalTomcat7Service {
      */
     Host getDefaultHost();
 
+    /**
+     * Creates a custom context configuration
+     */
+    ContextConfig createContextConfig();
 
 }

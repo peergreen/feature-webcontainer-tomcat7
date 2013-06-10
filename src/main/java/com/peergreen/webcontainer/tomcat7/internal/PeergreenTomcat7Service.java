@@ -22,6 +22,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+import javax.servlet.ServletContainerInitializer;
 
 import org.apache.catalina.Container;
 import org.apache.catalina.Engine;
@@ -31,10 +34,13 @@ import org.apache.catalina.LifecycleException;
 import org.apache.catalina.Server;
 import org.apache.catalina.Service;
 import org.apache.catalina.loader.WebappLoader;
+import org.apache.catalina.startup.ContextConfig;
+import org.apache.felix.ipojo.annotations.Bind;
 import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Instantiate;
 import org.apache.felix.ipojo.annotations.Provides;
 import org.apache.felix.ipojo.annotations.Requires;
+import org.apache.felix.ipojo.annotations.Unbind;
 import org.apache.felix.ipojo.annotations.Validate;
 import org.apache.tomcat.util.digester.Digester;
 import org.osgi.framework.BundleContext;
@@ -43,6 +49,7 @@ import org.xml.sax.SAXException;
 
 import com.peergreen.deployment.DeploymentService;
 import com.peergreen.webcontainer.tomcat7.Tomcat7Service;
+import com.peergreen.webcontainer.tomcat7.internal.core.PeergreenContextConfig;
 import com.peergreen.webcontainer.tomcat7.internal.ruleset.BundleContextDigester;
 import com.peergreen.webcontainer.tomcat7.internal.ruleset.TomcatRuleSet;
 
@@ -71,8 +78,14 @@ public class PeergreenTomcat7Service implements Tomcat7Service, InternalTomcat7S
      */
     private final BundleContext bundleContext;
 
+    /**
+     * Servlet initalizers
+     */
+    private final List<ServletContainerInitializer> servletContainerInitializers;
+
     public PeergreenTomcat7Service(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
+        this.servletContainerInitializers = new CopyOnWriteArrayList<>();
     }
 
     /**
@@ -220,6 +233,25 @@ public class PeergreenTomcat7Service implements Tomcat7Service, InternalTomcat7S
 
         // first host found
         return hosts.get(0);
+    }
+
+    @Bind(aggregate=true,optional=true)
+    public void bindServletContainerInitializer(final ServletContainerInitializer initializer) {
+        this.servletContainerInitializers.add(initializer);
+    }
+
+    @Unbind(aggregate=true,optional=true)
+    public void unbindServletContainerInitializer(final ServletContainerInitializer initializer) {
+        this.servletContainerInitializers.remove(initializer);
+    }
+
+    @Override
+    public ContextConfig createContextConfig() {
+        PeergreenContextConfig contextConfig = new PeergreenContextConfig();
+        for (ServletContainerInitializer servletContainerInitializer : servletContainerInitializers) {
+            contextConfig.addServletContainerInitializer(servletContainerInitializer);
+        }
+        return contextConfig;
     }
 
 }

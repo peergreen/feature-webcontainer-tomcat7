@@ -15,6 +15,12 @@
  */
 package com.peergreen.webcontainer.tomcat7.internal.core;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.servlet.ServletContainerInitializer;
+import javax.servlet.annotation.HandlesTypes;
+
 import org.apache.catalina.startup.ContextConfig;
 import org.xml.sax.InputSource;
 
@@ -32,5 +38,37 @@ public class PeergreenContextConfig extends ContextConfig {
     protected InputSource getGlobalWebXmlSource() {
         //FIXME : should use the config repository to find the resource
         return new InputSource(PeergreenContextConfig.class.getResource("/tomcat7-web.xml").toExternalForm());
+    }
+
+
+    /**
+     * Adds the given servlet container initializer.
+     * @param sci the servlet container initializer
+     */
+    public void addServletContainerInitializer(ServletContainerInitializer sci) {
+        initializerClassMap.put(sci, new HashSet<Class<?>>());
+
+        HandlesTypes ht = sci.getClass().getAnnotation(HandlesTypes.class);
+
+        if (ht != null) {
+            Class<?>[] types = ht.value();
+            if (types != null) {
+                for (Class<?> type : types) {
+                    if (type.isAnnotation()) {
+                        handlesTypesAnnotations = true;
+                    } else {
+                        handlesTypesNonAnnotations = true;
+                    }
+                    Set<ServletContainerInitializer> scis =
+                            typeInitializerMap.get(type);
+                    if (scis == null) {
+                        scis = new HashSet<ServletContainerInitializer>();
+                        typeInitializerMap.put(type, scis);
+                    }
+                    scis.add(sci);
+                }
+            }
+        }
+
     }
 }

@@ -47,7 +47,6 @@ import org.osgi.service.http.NamespaceException;
 import com.peergreen.webcontainer.tomcat7.internal.InternalTomcat7HttpService;
 import com.peergreen.webcontainer.tomcat7.internal.InternalTomcat7Service;
 import com.peergreen.webcontainer.tomcat7.internal.core.InstanceManagerLifeCycleListener;
-import com.peergreen.webcontainer.tomcat7.internal.core.PeergreenContextConfig;
 
 /**
  * This class implements the specific part of HTTP service for Tomcat. Calls are
@@ -149,7 +148,7 @@ public class BasicTomcat7HttpService implements InternalTomcat7HttpService {
             }
 
             // add the context config
-            final ContextConfig config = new PeergreenContextConfig();
+            final ContextConfig config = tomcat7Service.createContextConfig();
             httpServiceStandardContext.addLifecycleListener(config);
 
             // Set the PG Instance Manager

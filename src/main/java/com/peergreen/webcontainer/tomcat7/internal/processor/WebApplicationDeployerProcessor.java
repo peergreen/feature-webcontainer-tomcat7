@@ -15,14 +15,17 @@
  */
 package com.peergreen.webcontainer.tomcat7.internal.processor;
 
+import org.apache.catalina.startup.ContextConfig;
+import org.apache.felix.ipojo.annotations.Requires;
+
 import com.peergreen.deployment.ProcessorContext;
 import com.peergreen.deployment.ProcessorException;
 import com.peergreen.deployment.processor.Phase;
 import com.peergreen.deployment.processor.Processor;
 import com.peergreen.webcontainer.WebApplication;
+import com.peergreen.webcontainer.tomcat7.internal.InternalTomcat7Service;
 import com.peergreen.webcontainer.tomcat7.internal.TomcatWebApplication;
 import com.peergreen.webcontainer.tomcat7.internal.core.InstanceManagerLifeCycleListener;
-import com.peergreen.webcontainer.tomcat7.internal.core.PeergreenContextConfig;
 import com.peergreen.webcontainer.tomcat7.internal.core.PeergreenStandardContext;
 
 /**
@@ -33,6 +36,12 @@ import com.peergreen.webcontainer.tomcat7.internal.core.PeergreenStandardContext
 @Phase("INIT")
 public class WebApplicationDeployerProcessor {
 
+
+    private final InternalTomcat7Service tomcat7Service;
+
+    public WebApplicationDeployerProcessor(@Requires InternalTomcat7Service tomcat7Service) {
+        this.tomcat7Service = tomcat7Service;
+    }
 
     public void handle(WebApplication webApplication, ProcessorContext processorContext) throws ProcessorException {
 
@@ -51,7 +60,7 @@ public class WebApplicationDeployerProcessor {
         context.setPath(webApplication.getContextPath());
 
         // add the context config
-        PeergreenContextConfig contextConfig = new PeergreenContextConfig();
+        ContextConfig contextConfig = tomcat7Service.createContextConfig();
         context.addLifecycleListener(contextConfig);
 
         // Set the PG Instance Manager

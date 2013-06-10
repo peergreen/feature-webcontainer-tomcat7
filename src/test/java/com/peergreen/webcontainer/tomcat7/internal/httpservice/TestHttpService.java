@@ -59,6 +59,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.peergreen.webcontainer.tomcat7.internal.InternalTomcat7Service;
+import com.peergreen.webcontainer.tomcat7.internal.core.PeergreenContextConfig;
 
 public class TestHttpService {
 
@@ -108,6 +109,8 @@ public class TestHttpService {
 
         // setup PG service
         doReturn(defaultHost).when(internalTomcat7Service).getDefaultHost();
+        doReturn(new PeergreenContextConfig()).when(internalTomcat7Service).createContextConfig();
+
 
         // Here is how the wrapper is contained :
         // Wrapper -> Context -> Host -> Engine -> Service
