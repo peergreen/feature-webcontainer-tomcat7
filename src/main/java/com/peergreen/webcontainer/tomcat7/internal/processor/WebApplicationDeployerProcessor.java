@@ -69,6 +69,9 @@ public class WebApplicationDeployerProcessor {
         // Set the PG Instance Manager
         context.addLifecycleListener(new InstanceManagerLifeCycleListener(webApplication));
 
+        // Sets the parent classloader
+        context.setParentClassLoader(webApplication.getClassLoader());
+
         TomcatWebApplication tomcatWebApplication = new TomcatWebApplication();
         tomcatWebApplication.setContext(context);
 

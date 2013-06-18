@@ -15,14 +15,31 @@
  */
 package com.peergreen.webcontainer.tomcat7.internal.core;
 
+import org.apache.catalina.Loader;
 import org.apache.catalina.core.StandardContext;
+import org.apache.catalina.loader.WebappLoader;
 
 /**
  * Defines the customized version of StandardContext
- *
  * @author Florent Benoit
  */
 public class PeergreenStandardContext extends StandardContext {
 
+    public PeergreenStandardContext() {
+        setDelegate(true);
+    }
 
+
+    /**
+     * Defines a new loader
+     * @param loader the loader for which tunes the loader class
+     */
+    @Override
+    public void setLoader(final Loader loader) {
+        // In all cases, update the loader type
+        if (loader instanceof WebappLoader) {
+            ((WebappLoader) loader).setLoaderClass(PeergreenWebAppClassLoader.class.getName());
+        }
+        super.setLoader(loader);
+    }
 }

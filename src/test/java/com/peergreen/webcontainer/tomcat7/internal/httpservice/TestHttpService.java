@@ -206,6 +206,8 @@ public class TestHttpService {
         context.setParent(defaultHost);
         context.setRealm(new NullRealm());
 
+        context.setParentClassLoader(TestHttpService.class.getClassLoader());
+
         // now, start the context
         context.start();
 
