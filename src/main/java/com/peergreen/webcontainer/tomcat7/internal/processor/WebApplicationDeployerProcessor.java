@@ -51,6 +51,9 @@ public class WebApplicationDeployerProcessor {
         // Creates the context
         final PeergreenStandardContext context = new PeergreenStandardContext();
 
+        // Uses of Peergreen naming
+        context.setUseNaming(false);
+
         // Sets the docbase
         context.setDocBase(webApplication.getUnpackedDirectory().getPath());
         // Do not unpack the war (already done)
