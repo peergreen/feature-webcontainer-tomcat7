@@ -119,7 +119,9 @@
       </Realm>
 
       <Host name="localhost"  appBase="webapps"
-            unpackWARs="true" autoDeploy="true">
+            unpackWARs="false" autoDeploy="false"
+            deployOnStartup="false" deployXML="false"
+            xmlValidation="false" xmlNamespaceAware="false">
 
         <!-- SingleSignOn valve, share authentication between web applications
              Documentation at: /docs/config/valve.html -->
