@@ -24,7 +24,7 @@
   <packaging>bundle</packaging>
   <groupId>com.peergreen.webcontainer</groupId>
   <artifactId>peergreen-webcontainer-tomcat7</artifactId>
-  <version>1.0.1-SNAPSHOT</version>
+  <version>1.0.0-SNAPSHOT</version>
 
   <name>Peergreen WebContainer Tomcat7</name>
 
