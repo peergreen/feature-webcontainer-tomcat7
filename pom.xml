@@ -24,7 +24,7 @@
   <packaging>bundle</packaging>
   <groupId>com.peergreen.webcontainer</groupId>
   <artifactId>peergreen-webcontainer-tomcat7</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>1.0.0</version>
 
   <name>Peergreen WebContainer Tomcat7</name>
 
@@ -36,7 +36,7 @@
     <connection>scm:git:https://forge.peergreen.com/git/git/feature/web-container/tomcat7.git</connection>
     <developerConnection>scm:git:https://forge.peergreen.com/git/git/feature/web-container/tomcat7.git</developerConnection>
     <url>https://forge.peergreen.com/git/summary/?r=feature/web-container/tomcat7.git</url>
-    <tag>HEAD</tag>
+    <tag>WEBCONTAINER_TOMCAT7�_1_0_0</tag>
   </scm>
 
   <dependencies>
