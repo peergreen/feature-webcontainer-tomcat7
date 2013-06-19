@@ -38,6 +38,7 @@ import org.apache.catalina.startup.ContextConfig;
 import org.apache.felix.ipojo.annotations.Bind;
 import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Instantiate;
+import org.apache.felix.ipojo.annotations.Invalidate;
 import org.apache.felix.ipojo.annotations.Provides;
 import org.apache.felix.ipojo.annotations.Requires;
 import org.apache.felix.ipojo.annotations.Unbind;
@@ -159,6 +160,19 @@ public class PeergreenTomcat7Service implements Tomcat7Service, InternalTomcat7S
             server.start();
         } catch (LifecycleException e) {
             throw new IllegalStateException("Unable to start Tomcat", e);
+        }
+
+    }
+
+    /**
+     * Stop the Tomcat instance
+     */
+    @Invalidate
+    public void stop()  {
+        try {
+            server.stop();
+        } catch (LifecycleException e) {
+            throw new IllegalStateException("Unable to stop Tomcat", e);
         }
 
     }
