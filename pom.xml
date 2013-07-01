@@ -61,12 +61,12 @@
     <dependency>
       <groupId>com.peergreen.webcontainer</groupId>
       <artifactId>peergreen-webcontainer-api</artifactId>
-      <version>1.0.0</version>
+      <version>1.0.1-SNAPSHOT</version>
     </dependency>
     <dependency>
-      <groupId>com.peergreen.injection</groupId>
-      <artifactId>injection-api</artifactId>
-      <version>1.0.0</version>
+      <groupId>com.peergreen.metadata.adapter</groupId>
+      <artifactId>metadata-adapter-api</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>

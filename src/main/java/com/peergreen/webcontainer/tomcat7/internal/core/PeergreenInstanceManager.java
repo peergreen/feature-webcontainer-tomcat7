@@ -19,14 +19,17 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.naming.NamingException;
 
 import org.apache.catalina.Context;
 import org.apache.tomcat.InstanceManager;
 
-import com.peergreen.injection.AnnotatedClass;
-import com.peergreen.injection.AnnotatedMember;
-import com.peergreen.injection.InjectException;
+import com.peergreen.metadata.adapter.AnnotatedClass;
+import com.peergreen.metadata.adapter.AnnotatedMember;
+import com.peergreen.metadata.adapter.InjectException;
+import com.peergreen.metadata.adapter.LifeCycleCallbackException;
 import com.peergreen.webcontainer.WebApplication;
 
 /**
@@ -50,7 +53,14 @@ public class PeergreenInstanceManager implements InstanceManager {
 
     @Override
     public void destroyInstance(Object instance) throws InvocationTargetException, IllegalAccessException {
-        preDestroy(instance, instance.getClass());
+        if (annotatedClasses == null) {
+            return;
+        }
+        try {
+            preDestroy(instance, instance.getClass());
+        } catch (LifeCycleCallbackException e) {
+            throw new InvocationTargetException(e);
+        }
     }
 
     @Override
@@ -95,25 +105,54 @@ public class PeergreenInstanceManager implements InstanceManager {
             }
             servletClass = servletClass.getSuperclass();
         }
-
+        // call the post construct
+        try {
+            postConstruct(instance, clazz);
+        } catch (LifeCycleCallbackException e) {
+            throw new InvocationTargetException(e);
+        }
         return instance;
     }
 
+    /**
+     * Call postConstruct method on the specified instance recursively from deepest superclass to actual class.
+     *
+     * @param instance object to call postconstruct methods on
+     * @param clazz    (super) class to examine for postConstruct annotation.
+     * @throws LifeCycleCallbackException if postConstruct call fails
+     */
+    protected void postConstruct(Object instance, final Class<?> clazz) throws LifeCycleCallbackException {
 
+        Class<?> superClass = clazz.getSuperclass();
+        if (superClass != Object.class) {
+            postConstruct(instance, superClass);
+        }
+
+        // Get current class
+        AnnotatedClass annotatedClass = annotatedClasses.get(clazz.getName());
+        if (annotatedClass != null) {
+            // Calls the PostConstruct methods if any
+            annotatedClass.callback(PostConstruct.class.getName(), instance);
+        }
+    }
 
     /**
      * Call preDestroy method on the specified instance recursively from deepest superclass to actual class.
      * @param instance object to call preDestroy methods on
      * @param clazz    (super) class to examine for preDestroy annotation.
-     * @throws IllegalAccessException if preDestroy method is inaccessible.
-     * @throws java.lang.reflect.InvocationTargetException
-     *                                if call fails
+     * @throws LifeCycleCallbackException if preDestroy method call fails
      */
-    protected void preDestroy(Object instance, final Class<?> clazz)
-            throws IllegalAccessException, InvocationTargetException {
+    protected void preDestroy(Object instance, final Class<?> clazz) throws LifeCycleCallbackException {
         Class<?> superClass = clazz.getSuperclass();
         if (superClass != Object.class) {
             preDestroy(instance, superClass);
+        }
+
+        // Get current class
+        AnnotatedClass annotatedClass = annotatedClasses.get(clazz.getName());
+        if (annotatedClass != null) {
+            // Calls the PreDestroy methods if any
+            annotatedClass.callback(PreDestroy.class.getName(), instance);
         }
 
     }
