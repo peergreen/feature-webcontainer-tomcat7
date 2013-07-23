@@ -45,9 +45,6 @@ public class WebApplicationDeployerProcessor {
 
     public void handle(WebApplication webApplication, ProcessorContext processorContext) throws ProcessorException {
 
-        // deploy the given web application
-        System.out.println("Deploying the web application with context " + webApplication.getContextPath());
-
         // Creates the context
         final PeergreenStandardContext context = new PeergreenStandardContext();
 

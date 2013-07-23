@@ -107,7 +107,7 @@ public class BasicHttpService implements HttpService {
             context = createDefaultHttpContext();
         }
 
-        tomcat7HttpService.registerServlet(alias, servlet, initparams, context);
+        tomcat7HttpService.registerServlet(alias, servlet, initparams, context, bundle);
 
     }
 
@@ -190,7 +190,7 @@ public class BasicHttpService implements HttpService {
      */
     @Override
     public void unregister(String alias) {
-        tomcat7HttpService.unregister(alias);
+        tomcat7HttpService.unregister(alias, bundle);
     }
 
     /**
@@ -226,7 +226,7 @@ public class BasicHttpService implements HttpService {
      */
     public void stop() {
         // unregister all aliases
-        tomcat7HttpService.unregisterAll();
+        tomcat7HttpService.unregisterAll(bundle);
     }
 
 }

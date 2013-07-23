@@ -15,7 +15,16 @@
  */
 package com.peergreen.webcontainer.tomcat7.internal.core;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.catalina.Engine;
+import org.apache.catalina.Host;
 import org.apache.catalina.Loader;
+import org.apache.catalina.Service;
+import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.loader.WebappLoader;
 
@@ -41,5 +50,34 @@ public class PeergreenStandardContext extends StandardContext {
             ((WebappLoader) loader).setLoaderClass(PeergreenWebAppClassLoader.class.getName());
         }
         super.setLoader(loader);
+    }
+
+
+
+    public List<URI> getContextURIs() {
+        if (getParent() == null) {
+            throw new IllegalStateException("Cannot get context URI if context has not been added on a host");
+        }
+        List<URI> uris = new ArrayList<>();
+        Service service = ((Engine) this.getParent().getParent()).getService();
+        Connector[] connectors = service.findConnectors();
+        for (Connector connector : connectors) {
+            String hostName = ((Host) this.getParent()).getName();
+            if (connector.getProxyName() != null) {
+                hostName = connector.getProxyName();
+            }
+            int port = connector.getPort();
+            if (connector.getProxyPort() != 0) {
+                port = connector.getProxyPort();
+            }
+
+            String uri = connector.getScheme().concat("://").concat(hostName).concat(":").concat(String.valueOf(port)).concat(getPath());
+            try {
+                uris.add(new URI(uri));
+            } catch (URISyntaxException e) {
+                throw new IllegalArgumentException("Unable to build URI", e);
+            }
+        }
+        return uris;
     }
 }

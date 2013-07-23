@@ -53,11 +53,13 @@ import org.apache.tomcat.util.buf.MessageBytes;
 import org.apache.tomcat.util.http.mapper.MappingData;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.peergreen.deployment.model.BundleArtifactManager;
 import com.peergreen.webcontainer.tomcat7.internal.InternalTomcat7Service;
 import com.peergreen.webcontainer.tomcat7.internal.core.PeergreenContextConfig;
 
@@ -71,6 +73,9 @@ public class TestHttpService {
 
     @Mock
     private InternalTomcat7Service internalTomcat7Service;
+
+    @Mock
+    private Bundle bundle;
 
     @Mock
     private StandardService service;
@@ -98,6 +103,9 @@ public class TestHttpService {
     @Mock
     private HttpContext httpContext;
 
+    @Mock
+    private BundleArtifactManager bundleArtifactManager;
+
     private BasicTomcat7HttpService tomcat7HttpService;
 
     @BeforeClass
@@ -105,7 +113,7 @@ public class TestHttpService {
 
         // Init Tomcat
         MockitoAnnotations.initMocks(this);
-        this.tomcat7HttpService = new BasicTomcat7HttpService(null, internalTomcat7Service);
+        this.tomcat7HttpService = new BasicTomcat7HttpService(internalTomcat7Service, bundleArtifactManager);
 
         // setup PG service
         doReturn(defaultHost).when(internalTomcat7Service).getDefaultHost();
@@ -157,7 +165,7 @@ public class TestHttpService {
 
     @Test(expectedExceptions=IllegalArgumentException.class)
     public void testUnregisterAliasBeforeItExists() {
-        tomcat7HttpService.unregister(FULL_SERLVET_PATH);
+        tomcat7HttpService.unregister(FULL_SERLVET_PATH, bundle);
 
     }
 
@@ -177,7 +185,7 @@ public class TestHttpService {
         doReturn(true).when(httpContext).handleSecurity(any(Request.class), any(Response.class));
 
         // try to register the servlet
-        tomcat7HttpService.registerServlet(FULL_SERLVET_PATH, servlet, initparams, httpContext);
+        tomcat7HttpService.registerServlet(FULL_SERLVET_PATH, servlet, initparams, httpContext, bundle);
 
         // Check that servlet is registered in the wrapper
         StandardWrapperFacade wrapperFacade = (StandardWrapperFacade) servlet.getServletConfig();
@@ -244,7 +252,7 @@ public class TestHttpService {
         MyServlet servlet = new MyServlet();
 
         // expect namespace exception as the alias is already used.
-        tomcat7HttpService.registerServlet(FULL_SERLVET_PATH, servlet, null, null);
+        tomcat7HttpService.registerServlet(FULL_SERLVET_PATH, servlet, null, null, bundle);
     }
 
 
@@ -261,7 +269,7 @@ public class TestHttpService {
         // and the wrapper too
         assertTrue(searchWrapper(SERLVET_PATH, context));
 
-        tomcat7HttpService.unregister(FULL_SERLVET_PATH);
+        tomcat7HttpService.unregister(FULL_SERLVET_PATH, bundle);
 
         // Check that the wrapper is no longer here
         assertFalse(searchWrapper(SERLVET_PATH, context));

@@ -15,11 +15,14 @@
  */
 package com.peergreen.webcontainer.tomcat7.internal.processor;
 
+import java.net.URI;
+
 import org.apache.catalina.Host;
 import org.apache.felix.ipojo.annotations.Requires;
 
 import com.peergreen.deployment.ProcessorContext;
 import com.peergreen.deployment.ProcessorException;
+import com.peergreen.deployment.facet.endpoint.Endpoints;
 import com.peergreen.deployment.processor.Phase;
 import com.peergreen.deployment.processor.Processor;
 import com.peergreen.webcontainer.tomcat7.internal.InternalTomcat7Service;
@@ -46,6 +49,13 @@ public class TomcatWebApplicationStartProcessor {
 
         // Starts the context
         host.addChild(tomcatWebApplication.getContext());
+
+        // add the context Endpoint
+        Endpoints endpoints = processorContext.getArtifact().as(Endpoints.class);
+        for (URI uri : tomcatWebApplication.getContext().getContextURIs()) {
+            endpoints.register(uri, "HttpContext");
+        }
+
     }
 
 }

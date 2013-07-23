@@ -16,6 +16,8 @@
 package com.peergreen.webcontainer.tomcat7.internal.httpservice;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -39,11 +41,14 @@ import org.apache.felix.ipojo.annotations.Component;
 import org.apache.felix.ipojo.annotations.Instantiate;
 import org.apache.felix.ipojo.annotations.Provides;
 import org.apache.felix.ipojo.annotations.Requires;
-import org.osgi.framework.BundleContext;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
 
+import com.peergreen.deployment.Artifact;
+import com.peergreen.deployment.facet.endpoint.Endpoints;
+import com.peergreen.deployment.model.BundleArtifactManager;
 import com.peergreen.webcontainer.tomcat7.internal.InternalTomcat7HttpService;
 import com.peergreen.webcontainer.tomcat7.internal.InternalTomcat7Service;
 import com.peergreen.webcontainer.tomcat7.internal.core.InstanceManagerLifeCycleListener;
@@ -67,11 +72,6 @@ public class BasicTomcat7HttpService implements InternalTomcat7HttpService {
     private final InternalTomcat7Service tomcat7Service;
 
     /**
-     * BundleContext of this component
-     */
-    private final BundleContext bundleContext;
-
-    /**
      * Lock when accessing wrappers
      */
     private final Lock wrapperLock;
@@ -82,11 +82,17 @@ public class BasicTomcat7HttpService implements InternalTomcat7HttpService {
     private final List<Wrapper> wrappers;
 
     /**
+     * Artifact manager for bundle
+     */
+    private final BundleArtifactManager bundleArtifactManager;
+
+
+    /**
      * Instantiate http service.
      */
-    public BasicTomcat7HttpService(BundleContext bundleContext, @Requires InternalTomcat7Service tomcat7Service) {
-        this.bundleContext = bundleContext;
+    public BasicTomcat7HttpService(@Requires InternalTomcat7Service tomcat7Service, @Requires BundleArtifactManager bundleArtifactManager) {
         this.tomcat7Service = tomcat7Service;
+        this.bundleArtifactManager = bundleArtifactManager;
         this.wrapperLock = new ReentrantReadWriteLock().writeLock();
         this.wrappers = new ArrayList<>();
     }
@@ -204,13 +210,34 @@ public class BasicTomcat7HttpService implements InternalTomcat7HttpService {
      */
     @Override
     public void registerServlet(String alias, Servlet servlet, Dictionary<String, String> initparams,
-            HttpContext httpContext) throws ServletException, NamespaceException {
+            HttpContext httpContext, Bundle callerBundle) throws ServletException, NamespaceException {
 
         // Extract data from the alias
         AliasInfo aliasInfo = getAliasInfo(alias);
 
         // Gets the context for the given contextPath
         HttpServiceStandardContext httpServiceStandardContext = getStandardContext(aliasInfo, httpContext);
+
+        // adds the servlet endpoint
+        Artifact artifact = bundleArtifactManager.getArtifact(callerBundle);
+        if (artifact != null) {
+            Endpoints endpoints = artifact.as(Endpoints.class);
+            for (URI uri : httpServiceStandardContext.getContextURIs()) {
+                try {
+                    // remove context from uri
+                    String rootUri = uri.toString().substring(0, uri.toString().length() - httpServiceStandardContext.getPath().length());
+                    String[] categories;
+                    if (servlet instanceof WrappingResourceInServlet) {
+                        categories = new String[] { "OSGi", "Resource" };
+                    } else {
+                        categories = new String[] { "OSGi", "Servlet" };
+                    }
+                    endpoints.register(new URI(rootUri.concat(alias)), categories);
+                } catch (URISyntaxException e) {
+                    throw new IllegalArgumentException("Unable to register endpoint", e);
+                }
+            }
+        }
 
         // Check servlet path is unique
         if (httpServiceStandardContext.findChild(aliasInfo.getServletPath()) != null) {
@@ -266,7 +293,7 @@ public class BasicTomcat7HttpService implements InternalTomcat7HttpService {
      * Unregister the servlet found for the given alias
      */
     @Override
-    public void unregister(String alias) {
+    public void unregister(String alias, Bundle callerBundle) {
 
         // Get alias
         AliasInfo aliasInfo = getAliasInfo(alias);
@@ -305,7 +332,7 @@ public class BasicTomcat7HttpService implements InternalTomcat7HttpService {
      * Unregister all the wrappers.
      */
     @Override
-    public void unregisterAll() {
+    public void unregisterAll(Bundle callerBundle) {
         wrapperLock.lock();
         try {
             for (Wrapper wrapper : wrappers) {

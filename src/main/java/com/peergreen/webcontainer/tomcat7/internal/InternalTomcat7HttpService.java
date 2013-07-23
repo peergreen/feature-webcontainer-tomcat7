@@ -20,6 +20,7 @@ import java.util.Dictionary;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 
+import org.osgi.framework.Bundle;
 import org.osgi.service.http.HttpContext;
 import org.osgi.service.http.NamespaceException;
 
@@ -32,16 +33,16 @@ public interface InternalTomcat7HttpService {
     /**
      * Register the servlet with the given alias and init parameters
      */
-    void registerServlet(String alias, Servlet servlet, Dictionary<String, String> initparams, HttpContext context) throws ServletException, NamespaceException;
+    void registerServlet(String alias, Servlet servlet, Dictionary<String, String> initparams, HttpContext context, Bundle bundle) throws ServletException, NamespaceException;
 
     /**
      * Unregister the given alias
      * @param alias the alias of the resource/servlet
      */
-    void unregister(String alias);
+    void unregister(String alias, Bundle bundle);
 
     /**
      * Unregister all the wrappers (resource/servlets)
      */
-    void unregisterAll();
+    void unregisterAll(Bundle bundle);
 }

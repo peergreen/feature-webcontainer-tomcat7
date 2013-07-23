@@ -33,5 +33,4 @@ public interface InternalTomcat7Service {
      * Creates a custom context configuration
      */
     ContextConfig createContextConfig();
-
 }
