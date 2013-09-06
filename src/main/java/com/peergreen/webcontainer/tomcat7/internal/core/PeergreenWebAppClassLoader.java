@@ -15,7 +15,12 @@
  */
 package com.peergreen.webcontainer.tomcat7.internal.core;
 
+import java.io.IOException;
 import java.net.URL;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.catalina.loader.WebappClassLoader;
 
@@ -91,5 +96,15 @@ public class PeergreenWebAppClassLoader extends WebappClassLoader {
         public URL getResource(String name) {
             return null;
         }
+    }
+
+    @Override
+    public Enumeration<URL> getResources(final String name) throws IOException {
+        Enumeration<URL> resources = super.getResources(name);
+
+        // Only keep distinct elements
+        Set<URL> distinct = new HashSet<>();
+        distinct.addAll(Collections.list(resources));
+        return Collections.enumeration(distinct);
     }
 }
