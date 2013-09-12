@@ -250,15 +250,5 @@
     </repository>
   </repositories>
 
-  <pluginRepositories>
-    <pluginRepository>
-      <!-- TODO remove when iPOJO 1.10.1 will be promoted -->
-      <id>apache-felix-ipojo-plugin</id>
-      <name>Apache Felix iPOJO Staging Repository</name>
-      <url>https://repository.apache.org/content/repositories/orgapachefelix-021/</url>
-      <snapshots><enabled>false</enabled></snapshots>
-    </pluginRepository>
-  </pluginRepositories>
-
 </project>
 
