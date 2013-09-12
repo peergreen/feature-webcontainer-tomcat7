@@ -18,6 +18,7 @@ package com.peergreen.webcontainer.tomcat7.internal.core;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -56,11 +57,7 @@ public class PeergreenInstanceManager implements InstanceManager {
         if (annotatedClasses == null) {
             return;
         }
-        try {
-            preDestroy(instance, instance.getClass());
-        } catch (LifeCycleCallbackException e) {
-            throw new InvocationTargetException(e);
-        }
+        preDestroy(instance, instance.getClass());
     }
 
     @Override
@@ -70,8 +67,18 @@ public class PeergreenInstanceManager implements InstanceManager {
 
     @Override
     public Object newInstance(final String className, final ClassLoader classLoader) throws IllegalAccessException, NamingException, InvocationTargetException, InstantiationException, ClassNotFoundException {
-        Class<?> clazz = classLoader.loadClass(className);
-        return newInstance(clazz.newInstance(), clazz);
+        // Build
+        Object o = execute(new Callable<Object>() {
+            @Override
+            public Object call() throws Exception {
+                Class<?> clazz = classLoader.loadClass(className);
+                return clazz.newInstance();
+            }
+        }, classLoader);
+
+        // Configure
+        newInstance(o);
+        return o;
     }
 
     @Override
@@ -80,38 +87,39 @@ public class PeergreenInstanceManager implements InstanceManager {
         newInstance(o, o.getClass());
     }
 
-    private Object newInstance(Object instance, Class<?> clazz) throws InvocationTargetException  {
+    private Object newInstance(final Object instance, final Class<?> clazz) throws InvocationTargetException  {
         if (annotatedClasses == null) {
             return instance;
         }
 
-        Class<?> servletClass = clazz;
+        return execute(new Callable<Object>() {
+            @Override
+            public Object call() throws Exception {
+                Class<?> servletClass = clazz;
 
-        while (servletClass != null) {
+                while (servletClass != null) {
 
-            // perform injection on the selected instance
-            AnnotatedClass annotatedClass = annotatedClasses.get(servletClass.getName());
-            if (annotatedClass != null) {
-                List<AnnotatedMember> annotatedMembers = annotatedClass.entries();
-                for (AnnotatedMember annotatedMember : annotatedMembers) {
-                    if (annotatedMember.hasInjection()) {
-                        try {
-                            annotatedMember.inject(instance);
-                        } catch (InjectException e) {
-                            throw new InvocationTargetException(e);
+                    // perform injection on the selected instance
+                    AnnotatedClass annotatedClass = annotatedClasses.get(servletClass.getName());
+                    if (annotatedClass != null) {
+                        List<AnnotatedMember> annotatedMembers = annotatedClass.entries();
+                        for (AnnotatedMember annotatedMember : annotatedMembers) {
+                            if (annotatedMember.hasInjection()) {
+                                try {
+                                    annotatedMember.inject(instance);
+                                } catch (InjectException e) {
+                                    throw new InvocationTargetException(e);
+                                }
+                            }
                         }
                     }
+                    servletClass = servletClass.getSuperclass();
                 }
+                // call the post construct
+                postConstruct(instance, clazz);
+                return instance;
             }
-            servletClass = servletClass.getSuperclass();
-        }
-        // call the post construct
-        try {
-            postConstruct(instance, clazz);
-        } catch (LifeCycleCallbackException e) {
-            throw new InvocationTargetException(e);
-        }
-        return instance;
+        }, classLoader);
     }
 
     /**
@@ -119,42 +127,72 @@ public class PeergreenInstanceManager implements InstanceManager {
      *
      * @param instance object to call postconstruct methods on
      * @param clazz    (super) class to examine for postConstruct annotation.
-     * @throws LifeCycleCallbackException if postConstruct call fails
+     * @throws InvocationTargetException if postConstruct call fails
      */
-    protected void postConstruct(Object instance, final Class<?> clazz) throws LifeCycleCallbackException {
+    protected void postConstruct(final Object instance, final Class<?> clazz) throws InvocationTargetException {
 
-        Class<?> superClass = clazz.getSuperclass();
-        if (superClass != Object.class) {
-            postConstruct(instance, superClass);
-        }
+        execute(new Callable<Object>() {
+            @Override
+            public Object call() throws Exception {
+                Class<?> superClass = clazz.getSuperclass();
+                if (superClass != Object.class) {
+                    postConstruct(instance, superClass);
+                }
 
-        // Get current class
-        AnnotatedClass annotatedClass = annotatedClasses.get(clazz.getName());
-        if (annotatedClass != null) {
-            // Calls the PostConstruct methods if any
-            annotatedClass.callback(PostConstruct.class.getName(), instance);
-        }
+                // Get current class
+                AnnotatedClass annotatedClass = annotatedClasses.get(clazz.getName());
+                if (annotatedClass != null) {
+                    // Calls the PostConstruct methods if any
+                    annotatedClass.callback(PostConstruct.class.getName(), instance);
+                }
+
+                return null;
+            }
+        }, classLoader);
     }
 
     /**
      * Call preDestroy method on the specified instance recursively from deepest superclass to actual class.
      * @param instance object to call preDestroy methods on
      * @param clazz    (super) class to examine for preDestroy annotation.
-     * @throws LifeCycleCallbackException if preDestroy method call fails
+     * @throws InvocationTargetException if preDestroy method call fails
      */
-    protected void preDestroy(Object instance, final Class<?> clazz) throws LifeCycleCallbackException {
-        Class<?> superClass = clazz.getSuperclass();
-        if (superClass != Object.class) {
-            preDestroy(instance, superClass);
-        }
+    protected void preDestroy(final Object instance, final Class<?> clazz) throws InvocationTargetException {
 
-        // Get current class
-        AnnotatedClass annotatedClass = annotatedClasses.get(clazz.getName());
-        if (annotatedClass != null) {
-            // Calls the PreDestroy methods if any
-            annotatedClass.callback(PreDestroy.class.getName(), instance);
-        }
+        execute(new Callable<Object>() {
+            @Override
+            public Object call() throws Exception {
+                Class<?> superClass = clazz.getSuperclass();
+                if (superClass != Object.class) {
+                    preDestroy(instance, superClass);
+                }
 
+                // Get current class
+                AnnotatedClass annotatedClass = annotatedClasses.get(clazz.getName());
+                if (annotatedClass != null) {
+                    // Calls the PreDestroy methods if any
+                    annotatedClass.callback(PreDestroy.class.getName(), instance);
+                }
+
+                return null;
+            }
+        }, classLoader);
+    }
+
+    private static <T> T execute(Callable<T> callable, ClassLoader loader) throws InvocationTargetException {
+        ClassLoader contextClassLoader = null;
+        try {
+            contextClassLoader = Thread.currentThread().getContextClassLoader();
+            Thread.currentThread().setContextClassLoader(loader);
+
+            return callable.call();
+        } catch (Exception e) {
+            throw new InvocationTargetException(e, "Cannot execute the given Callable with TCCL set to " + loader);
+        } finally {
+            if (contextClassLoader != null) {
+                Thread.currentThread().setContextClassLoader(contextClassLoader);
+            }
+        }
     }
 
 
