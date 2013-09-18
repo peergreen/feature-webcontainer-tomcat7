@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -79,7 +81,7 @@ public class BasicTomcat7HttpService implements InternalTomcat7HttpService {
     /**
      * Wrappers.
      */
-    private final List<Wrapper> wrappers;
+    private final Map<Bundle, List<Wrapper>> wrappersByBundle;
 
     /**
      * Artifact manager for bundle
@@ -94,7 +96,7 @@ public class BasicTomcat7HttpService implements InternalTomcat7HttpService {
         this.tomcat7Service = tomcat7Service;
         this.bundleArtifactManager = bundleArtifactManager;
         this.wrapperLock = new ReentrantReadWriteLock().writeLock();
-        this.wrappers = new ArrayList<>();
+        this.wrappersByBundle = new ConcurrentHashMap<>();
     }
 
     /**
@@ -259,6 +261,11 @@ public class BasicTomcat7HttpService implements InternalTomcat7HttpService {
         // adds the wrapper
         wrapperLock.lock();
         try {
+            List<Wrapper> wrappers = wrappersByBundle.get(callerBundle);
+            if (wrappers == null) {
+                wrappers = new ArrayList<>();
+                wrappersByBundle.put(callerBundle, wrappers);
+            }
             wrappers.add(wrapper);
         } finally {
             wrapperLock.unlock();
@@ -316,7 +323,10 @@ public class BasicTomcat7HttpService implements InternalTomcat7HttpService {
         try {
             Wrapper wrapper = (Wrapper) container;
             unregisterWrapper(wrapper);
-            wrappers.remove(wrapper);
+            List<Wrapper> wrappers = wrappersByBundle.get(callerBundle);
+            if (wrappers != null) {
+                wrappers.remove(wrapper);
+            }
 
             // If we only have jsp and default wrapper, remove the context itself
             if (httpServiceStandardContext.findChildren().length == 2 && httpServiceStandardContext.findChild("default") != null && httpServiceStandardContext.findChild("jsp") != null) {
@@ -335,8 +345,11 @@ public class BasicTomcat7HttpService implements InternalTomcat7HttpService {
     public void unregisterAll(Bundle callerBundle) {
         wrapperLock.lock();
         try {
-            for (Wrapper wrapper : wrappers) {
-                unregisterWrapper(wrapper);
+            List<Wrapper> wrappers = wrappersByBundle.get(callerBundle);
+            if (wrappers != null) {
+                for (Wrapper wrapper : wrappers) {
+                    unregisterWrapper(wrapper);
+                }
             }
             wrappers.clear();
         } finally {
