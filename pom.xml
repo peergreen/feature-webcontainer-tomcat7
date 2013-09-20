@@ -27,7 +27,7 @@
   <name>Peergreen WebContainer Tomcat7</name>
 
   <properties>
-    <tomcat7.version>7.0.41</tomcat7.version>
+    <tomcat7.version>7.0.42</tomcat7.version>
   </properties>
 
   <scm>
