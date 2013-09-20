@@ -28,6 +28,9 @@
 
   <properties>
     <tomcat7.version>7.0.42</tomcat7.version>
+    <deployment-api.version>1.0.2</deployment-api.version>
+    <webcontainer-api.version>1.0.1</webcontainer-api.version>
+    <metadata-adapter-api.version>1.0.0</metadata-adapter-api.version>
   </properties>
 
   <scm>
@@ -41,7 +44,7 @@
     <dependency>
       <groupId>com.peergreen.deployment</groupId>
       <artifactId>deployment-api</artifactId>
-      <version>1.0.2-SNAPSHOT</version>
+      <version>${deployment-api.version}</version>
       <type>jar</type>
     </dependency>
     <dependency>
@@ -59,12 +62,12 @@
     <dependency>
       <groupId>com.peergreen.webcontainer</groupId>
       <artifactId>peergreen-webcontainer-api</artifactId>
-      <version>1.0.1-SNAPSHOT</version>
+      <version>${webcontainer-api.version}</version>
     </dependency>
     <dependency>
       <groupId>com.peergreen.metadata.adapter</groupId>
       <artifactId>metadata-adapter-api</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
+      <version>${metadata-adapter-api.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
@@ -89,7 +92,7 @@
     <dependency>
       <groupId>org.ow2.spec.ee</groupId>
       <artifactId>ow2-servlet-3.0-spec</artifactId>
-      <version>1.0.12</version>
+      <version>1.0.13</version>
       <scope>provided</scope>
     </dependency>
 
@@ -198,6 +201,21 @@
 
   <build>
     <defaultGoal>install</defaultGoal>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>2.6</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.16</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
   </build>
 
   <repositories>
