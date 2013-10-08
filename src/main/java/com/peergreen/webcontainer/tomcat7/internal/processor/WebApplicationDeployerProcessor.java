@@ -15,6 +15,9 @@
  */
 package com.peergreen.webcontainer.tomcat7.internal.processor;
 
+import java.net.URL;
+import java.util.Collection;
+
 import org.apache.catalina.startup.ContextConfig;
 import org.apache.felix.ipojo.annotations.Requires;
 
@@ -27,6 +30,7 @@ import com.peergreen.webcontainer.tomcat7.internal.InternalTomcat7Service;
 import com.peergreen.webcontainer.tomcat7.internal.TomcatWebApplication;
 import com.peergreen.webcontainer.tomcat7.internal.core.InstanceManagerLifeCycleListener;
 import com.peergreen.webcontainer.tomcat7.internal.core.PeergreenStandardContext;
+import com.peergreen.webcontainer.tomcat7.internal.core.tld.PeergreenTldListener;
 
 /**
  * WAR scanner.
@@ -62,6 +66,12 @@ public class WebApplicationDeployerProcessor {
         // add the context config
         ContextConfig contextConfig = tomcat7Service.createContextConfig();
         context.addLifecycleListener(contextConfig);
+
+        // Sets PG Tld Listener
+        Collection<URL> tldUrls = webApplication.getExtraTlds();
+        if (tldUrls != null && tldUrls.size() > 0) {
+            context.addLifecycleListener(new PeergreenTldListener(tldUrls));
+        }
 
         // Set the PG Instance Manager
         context.addLifecycleListener(new InstanceManagerLifeCycleListener(webApplication));
