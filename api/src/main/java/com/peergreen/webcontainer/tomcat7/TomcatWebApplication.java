@@ -13,20 +13,13 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.peergreen.webcontainer.tomcat7.internal;
+package com.peergreen.webcontainer.tomcat7;
 
-import com.peergreen.webcontainer.tomcat7.internal.core.PeergreenStandardContext;
 
-public class TomcatWebApplication {
+public interface TomcatWebApplication {
 
-    private PeergreenStandardContext context;
+    void setContext(PeergreenContext context);
 
-    public void setContext(PeergreenStandardContext context) {
-        this.context = context;
-    }
-
-    public PeergreenStandardContext getContext() {
-        return context;
-    }
+    PeergreenContext getContext();
 
 }

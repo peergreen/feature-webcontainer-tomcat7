@@ -26,8 +26,9 @@ import com.peergreen.deployment.ProcessorException;
 import com.peergreen.deployment.processor.Phase;
 import com.peergreen.deployment.processor.Processor;
 import com.peergreen.webcontainer.WebApplication;
+import com.peergreen.webcontainer.tomcat7.TomcatWebApplication;
+import com.peergreen.webcontainer.tomcat7.internal.DefaultTomcatWebApplication;
 import com.peergreen.webcontainer.tomcat7.internal.InternalTomcat7Service;
-import com.peergreen.webcontainer.tomcat7.internal.TomcatWebApplication;
 import com.peergreen.webcontainer.tomcat7.internal.core.InstanceManagerLifeCycleListener;
 import com.peergreen.webcontainer.tomcat7.internal.core.PeergreenStandardContext;
 import com.peergreen.webcontainer.tomcat7.internal.core.tld.PeergreenTldListener;
@@ -79,7 +80,7 @@ public class WebApplicationDeployerProcessor {
         // Sets the parent classloader
         context.setParentClassLoader(webApplication.getClassLoader());
 
-        TomcatWebApplication tomcatWebApplication = new TomcatWebApplication();
+        TomcatWebApplication tomcatWebApplication = new DefaultTomcatWebApplication();
         tomcatWebApplication.setContext(context);
 
         // add tomcat web application

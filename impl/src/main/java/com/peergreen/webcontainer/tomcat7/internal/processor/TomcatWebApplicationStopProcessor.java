@@ -15,47 +15,28 @@
  */
 package com.peergreen.webcontainer.tomcat7.internal.processor;
 
-import java.net.URI;
-
-import org.apache.catalina.Host;
-import org.apache.felix.ipojo.annotations.Requires;
-
 import com.peergreen.deployment.ProcessorContext;
 import com.peergreen.deployment.ProcessorException;
-import com.peergreen.deployment.facet.endpoint.Endpoints;
 import com.peergreen.deployment.processor.Phase;
 import com.peergreen.deployment.processor.Processor;
-import com.peergreen.webcontainer.tomcat7.internal.InternalTomcat7Service;
-import com.peergreen.webcontainer.tomcat7.internal.TomcatWebApplication;
+import com.peergreen.webcontainer.tomcat7.PeergreenContext;
+import com.peergreen.webcontainer.tomcat7.TomcatWebApplication;
 
 /**
- * WAR scanner.
+ * Stop the given web application.
  * @author Florent Benoit
  */
 @Processor
-@Phase("START")
-public class TomcatWebApplicationStartProcessor {
+@Phase("STOP")
+public class TomcatWebApplicationStopProcessor {
 
-    private final InternalTomcat7Service tomcat7Service;
-
-    public TomcatWebApplicationStartProcessor(@Requires InternalTomcat7Service tomcat7Service) {
-        this.tomcat7Service = tomcat7Service;
-    }
 
     public void handle(TomcatWebApplication tomcatWebApplication, ProcessorContext processorContext) throws ProcessorException {
 
-        // Gets the host
-        Host host = tomcat7Service.getDefaultHost();
-
-        // Starts the context
-        host.addChild(tomcatWebApplication.getContext());
-
-        // add the context Endpoint
-        Endpoints endpoints = processorContext.getArtifact().as(Endpoints.class);
-        for (URI uri : tomcatWebApplication.getContext().getContextURIs()) {
-            endpoints.register(uri, "HttpContext");
+        PeergreenContext context = tomcatWebApplication.getContext();
+        if (context != null) {
+            context.getParent().removeChild(context);
         }
-
     }
 
 }

@@ -28,11 +28,13 @@ import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.loader.WebappLoader;
 
+import com.peergreen.webcontainer.tomcat7.PeergreenContext;
+
 /**
  * Defines the customized version of StandardContext
  * @author Florent Benoit
  */
-public class PeergreenStandardContext extends StandardContext {
+public class PeergreenStandardContext extends StandardContext implements PeergreenContext {
 
     public PeergreenStandardContext() {
         setDelegate(true);
