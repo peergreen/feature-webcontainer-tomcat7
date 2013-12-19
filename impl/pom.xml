@@ -15,7 +15,7 @@
   <parent>
     <groupId>com.peergreen.webcontainer</groupId>
     <artifactId>peergreen-webcontainer-tomcat7-parent</artifactId>
-    <version>1.0.2-SNAPSHOT</version>
+    <version>1.0.2</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
@@ -222,7 +222,7 @@
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                    <ignore></ignore>
+                    <ignore />
                   </action>
                 </pluginExecution>
                 <pluginExecution>
@@ -235,7 +235,7 @@
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                    <ignore></ignore>
+                    <ignore />
                   </action>
                 </pluginExecution>
               </pluginExecutions>
@@ -280,24 +280,14 @@
             </goals>
             <configuration>
               <tasks>
-                <fixcrlf
-                  srcdir="${project.build.directory}/tomcat-catalina-sources/org/apache/jasper/compiler"
-                  includes="**/*.java" eof="remove" />
-                <fixcrlf srcdir="src/main/patches" includes="**/*.patch"
-                  eof="remove" />
-                <patch patchfile="src/main/patches/TagLibraryInfoImpl.patch"
-                  dir="${project.build.directory}/tomcat-catalina-sources/org/apache/jasper/compiler" />
-                <delete
-                  dir="${project.build.directory}/generated-sources/tomcat7" />
-                <mkdir
-                  dir="${project.build.directory}/generated-sources/tomcat7/org/apache/jasper/compiler" />
-                <copy
-                  file="${project.build.directory}/tomcat-catalina-sources/org/apache/jasper/compiler/TagLibraryInfoImpl.java"
-                  todir="${project.build.directory}/generated-sources/tomcat7/org/apache/jasper/compiler" />
-                <delete
-                  dir="${project.build.directory}/tomcat-catalina-sources" />
-                <delete
-                  dir="${project.build.directory}/dependency-maven-plugin-markers" />
+                <fixcrlf srcdir="${project.build.directory}/tomcat-catalina-sources/org/apache/jasper/compiler" includes="**/*.java" eof="remove" />
+                <fixcrlf srcdir="src/main/patches" includes="**/*.patch" eof="remove" />
+                <patch patchfile="src/main/patches/TagLibraryInfoImpl.patch" dir="${project.build.directory}/tomcat-catalina-sources/org/apache/jasper/compiler" />
+                <delete dir="${project.build.directory}/generated-sources/tomcat7" />
+                <mkdir dir="${project.build.directory}/generated-sources/tomcat7/org/apache/jasper/compiler" />
+                <copy file="${project.build.directory}/tomcat-catalina-sources/org/apache/jasper/compiler/TagLibraryInfoImpl.java" todir="${project.build.directory}/generated-sources/tomcat7/org/apache/jasper/compiler" />
+                <delete dir="${project.build.directory}/tomcat-catalina-sources" />
+                <delete dir="${project.build.directory}/dependency-maven-plugin-markers" />
               </tasks>
             </configuration>
           </execution>
