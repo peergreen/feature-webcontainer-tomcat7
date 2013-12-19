@@ -29,7 +29,7 @@
   <properties>
     <tomcat7.version>7.0.42</tomcat7.version>
     <deployment-api.version>1.0.2</deployment-api.version>
-    <webcontainer-api.version>1.0.2-SNAPSHOT</webcontainer-api.version>
+    <webcontainer-api.version>1.0.2</webcontainer-api.version>
     <metadata-adapter-api.version>1.0.0</metadata-adapter-api.version>
   </properties>
 
